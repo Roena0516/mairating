@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase-server";
 
 // 브라우저 확장 프로그램이나 북마클릿에서 호출할 때 필요한 CORS 설정
 const corsHeaders = {
-  "Access-Control-Allow-Origin": "https://maimai.sega.jp", // 또는 "*" (보안상 도메인 지정 권장)
+  "Access-Control-Allow-Origin": "https://maimaidx-eng.com", // 또는 "*" (보안상 도메인 지정 권장)
   "Access-Control-Allow-Methods": "POST, OPTIONS",
   "Access-Control-Allow-Headers": "Content-Type",
   "Access-Control-Allow-Credentials": "true",
