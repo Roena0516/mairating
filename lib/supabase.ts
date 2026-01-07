@@ -1,7 +1,11 @@
 import { createClient } from "@supabase/supabase-js";
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+// 환경 변수가 없을 경우 에러를 미리 방지
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
 
-// 서버 전용 클라이언트 (API Route에서 사용)
+if (!supabaseUrl || !supabaseServiceKey) {
+  console.error("환경 변수가 없습니다.");
+}
+
 export const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
