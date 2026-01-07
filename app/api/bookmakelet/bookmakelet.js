@@ -98,6 +98,7 @@ javascript: (async function () {
     const response = await fetch("http://localhost:3000/api/records", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      credentials: "include",
       body: JSON.stringify({ records: allRecords, userProfile: userProfile }),
     });
 
