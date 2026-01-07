@@ -55,7 +55,7 @@ javascript: (async function () {
 
     // --- 곡 수집 로직 ---
     const genres = [101, 102, 103, 104, 105, 199];
-    const diffs = [2, 3, 4];
+    const diffs = [2, 3, 4]; // Expert, Master, Re:Master
     let allRecords = [];
 
     for (let g of genres) {
@@ -77,15 +77,47 @@ javascript: (async function () {
           const levelStr = row
             .querySelector(".music_lv_block")
             ?.innerText.trim();
+
           if (title && scoreStr) {
             const achievement = parseFloat(scoreStr.replace("%", ""));
             let baseLevel = parseFloat(levelStr.replace("+", ""));
+
+            // 12.0 미만 곡 필터링
+            const internalLevel = levelStr.includes("+") ? baseLevel + 0.6 : baseLevel;
+            if (internalLevel < 12.0) return;
+
+            // FC/AP 아이콘 파싱
+            let fc_type = null;
+            const fcImg = row.querySelector('img[src*="music_icon_"]');
+            if (fcImg) {
+              const src = fcImg.src;
+              if (src.includes("music_icon_back.png")) fc_type = null; // 아무것도 없음
+              else if (src.includes("music_icon_fc.png")) fc_type = "fc";
+              else if (src.includes("music_icon_fcp.png")) fc_type = "fc+";
+              else if (src.includes("music_icon_ap.png")) fc_type = "ap";
+              else if (src.includes("music_icon_app.png")) fc_type = "ap+";
+            }
+
+            // Sync/FS 아이콘 파싱
+            let fs_type = null;
+            const fsImgs = row.querySelectorAll("img.h_30");
+            fsImgs.forEach((img) => {
+              const src = img.src;
+              if (src.includes("music_icon_sync.png")) fs_type = "sync";
+              else if (src.includes("music_icon_fs.png")) fs_type = "fs";
+              else if (src.includes("music_icon_fsp.png")) fs_type = "fs+";
+              else if (src.includes("music_icon_fsd.png")) fs_type = "fsd";
+              else if (src.includes("music_icon_fsdp.png")) fs_type = "fsd+";
+            });
+
             allRecords.push({
               title,
               achievement,
-              level: levelStr.includes("+") ? baseLevel + 0.6 : baseLevel,
+              level: internalLevel,
               difficulty_type: { 2: "expert", 3: "master", 4: "remaster" }[d],
               is_dx: !!row.querySelector('img[src*="music_kind_icon_dx.png"]'),
+              fc_type,
+              fs_type,
             });
           }
         });
@@ -103,9 +135,10 @@ javascript: (async function () {
     });
 
     if (response.ok) {
-      statusDiv.innerHTML = "✅ <b>Success! All data saved.</b>";
+      statusDiv.innerHTML = `✅ <b>Success! ${allRecords.length} songs saved.</b>`;
     } else {
-      throw new Error("Server response failed");
+      const errorData = await response.json();
+      throw new Error(errorData.error || "Server response failed");
     }
     setTimeout(() => statusDiv.remove(), 2000);
   } catch (err) {
