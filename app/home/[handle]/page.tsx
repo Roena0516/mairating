@@ -4,11 +4,24 @@ import { computeBestRating } from "@/lib/rating";
 
 // 난이도별 색상 정의
 const DIFFICULTY_COLORS: Record<string, string> = {
+  basic: "bg-emerald-500",
+  advanced: "bg-orange-400",
+  expert: "bg-rose-500",
+  master: "bg-purple-600",
+  remaster: "bg-violet-800",
   Basic: "bg-emerald-500",
   Advanced: "bg-orange-400",
   Expert: "bg-rose-500",
   Master: "bg-purple-600",
   "Re:Master": "bg-violet-800",
+};
+
+// FC 아이콘 매핑
+const FC_ICONS: Record<string, string> = {
+  fc: "🎯",
+  "fc+": "🎯+",
+  ap: "💯",
+  "ap+": "💯+",
 };
 
 // Next.js 15의 새로운 Page Props 타입 정의
@@ -31,6 +44,8 @@ export default async function DashboardPage({ params }: PageProps) {
       id, nickname, handle, icon_url, total_stars, play_count_total,
       user_records (
         achievement,
+        fc_type,
+        fs_type,
         music_details (
           internal_level,
           difficulty_type,
@@ -141,9 +156,18 @@ export default async function DashboardPage({ params }: PageProps) {
               </h2>
             </div>
             <div className="space-y-3">
-              {newSongs.map((song, i) => (
-                <SongCard key={i} index={i + 1} song={song} />
-              ))}
+              {newSongs.length > 0 ? (
+                newSongs.map((song, i) => (
+                  <SongCard key={i} index={i + 1} song={song} />
+                ))
+              ) : (
+                <div className="text-center py-12 text-slate-400">
+                  <p className="text-sm">아직 신곡 전적이 없습니다.</p>
+                  <p className="text-xs mt-2">
+                    maimaiDX 사이트에서 북마클릿을 실행해주세요.
+                  </p>
+                </div>
+              )}
             </div>
           </div>
 
@@ -156,9 +180,18 @@ export default async function DashboardPage({ params }: PageProps) {
               </h2>
             </div>
             <div className="space-y-3">
-              {oldSongs.map((song, i) => (
-                <SongCard key={i} index={i + 1} song={song} />
-              ))}
+              {oldSongs.length > 0 ? (
+                oldSongs.map((song, i) => (
+                  <SongCard key={i} index={i + 1} song={song} />
+                ))
+              ) : (
+                <div className="text-center py-12 text-slate-400">
+                  <p className="text-sm">아직 구곡 전적이 없습니다.</p>
+                  <p className="text-xs mt-2">
+                    maimaiDX 사이트에서 북마클릿을 실행해주세요.
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -170,6 +203,10 @@ export default async function DashboardPage({ params }: PageProps) {
 // 개별 곡 카드 컴포넌트
 function SongCard({ index, song }: { index: number; song: any }) {
   const diffColor = DIFFICULTY_COLORS[song.difficulty] || "bg-slate-400";
+  const fcIcon = song.fc_type ? FC_ICONS[song.fc_type] : null;
+
+  // 난이도 표시 텍스트 정규화
+  const displayDifficulty = song.difficulty.charAt(0).toUpperCase() + song.difficulty.slice(1);
 
   return (
     <div className="flex items-center gap-4 bg-white p-4 rounded-2xl border border-slate-100 shadow-sm hover:translate-x-1 transition-all">
@@ -184,11 +221,16 @@ function SongCard({ index, song }: { index: number; song: any }) {
           <span
             className={`text-[8px] font-black text-white px-1.5 py-0.5 rounded ${diffColor}`}
           >
-            {song.difficulty}
+            {displayDifficulty === "Remaster" ? "Re:Master" : displayDifficulty}
           </span>
           <span className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">
             {song.is_dx ? "DX" : "STD"} / LV.{song.internal_level.toFixed(1)}
           </span>
+          {fcIcon && (
+            <span className="text-xs" title={`FC Type: ${song.fc_type}`}>
+              {fcIcon}
+            </span>
+          )}
         </div>
       </div>
       <div className="text-right">
